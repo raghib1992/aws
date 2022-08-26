@@ -1,0 +1,115 @@
+---
+Parameters:
+  SecurityGroupDescription:
+    Description: Security Group Description
+    Type: String
+  # AWSAMI:
+  #   Description: AMI Id for the Instance
+  #   Type: String
+  AWSRegion:
+    Description: Provie the region
+    Type: String
+  AZ:
+    Description: Provie the region
+    Type: String
+  SSHKey:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instance
+
+Mappings:
+  RegionAMIMap:
+    ap-south-1:
+      AmazonLinux: ami-08df646e18b182346
+      Ubuntu: ami-068257025f72f470d
+    us-east-1:
+      AmazonLinux: ami-0cff7528ff583bf9a
+      Ubuntu: ami-052efd3df9dad4825
+    eu-west-2:
+      AmazonLinux: ami-078a289ddf4b09ae0
+      Ubuntu: ami-0fb391cce7a602d1f
+  RegionAvailabilityZone:
+    ap-south-1:
+      a: ap-south-1a
+      b: ap-south-1b
+      c: ap-south-1c
+    us-east-1:
+      a: us-east-1a
+      b: us-east-1b
+      c: us-east-1c
+    eu-west-2:
+      a: eu-west-2a
+      b: eu-west-2b
+      c: eu-west-2c
+
+Resources:
+  MyInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      AvailabilityZone: !FindInMap [RegionAvailabilityZone, !Ref AWSRegion, !Ref AZ]
+      ImageId: !FindInMap [RegionAMIMap, !Ref AWSRegion, AmazonLinux]
+      InstanceType: t2.micro
+      KeyName: !Ref SSHKey
+      SecurityGroups:
+        - !Ref SSHSecurityGroup
+        - !Ref ServerSecurityGroup
+      UserData: 
+        Fn::Base64:
+          !Sub |
+            #!/bin/bash -xe
+            # Get the latest CloudFormation package
+            yum update -y aws-cfn-bootstrap
+            # Start cfn-init
+            /opt/aws/bin/cfn-init -s ${AWS::StackId} -r MyInstance --region ${AWS::Region} || error_exit 'Failed to run cfn-init'
+    Metadata:
+      Comment: Install a simple Apache HTTP page
+      AWS::CloudFormation::Init:
+        config:
+          packages:
+            yum:
+              httpd: []
+          files:
+            "/var/www/html/index.html":
+              content: |
+                <h1>Hello World from EC2 instance!</h1>
+                <p>This was created using cfn-init</p>
+              mode: '000644'
+          commands:
+            hello:
+              command: "echo 'hello world'"
+          services:
+            sysvinit:
+              httpd:
+                enabled: 'true'
+                ensureRunning: 'true'
+
+  # an elastic IP for our instance
+  MyEIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      InstanceId: !Ref MyInstance
+
+  # our EC2 security group
+  SSHSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable SSH access via port 22
+      SecurityGroupIngress:
+      - CidrIp: 0.0.0.0/0
+        FromPort: 22
+        IpProtocol: tcp
+        ToPort: 22
+
+  # our second EC2 security group
+  ServerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Ref SecurityGroupDescription
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: 0.0.0.0/0

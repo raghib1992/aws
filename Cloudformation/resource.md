@@ -1,0 +1,15 @@
+## resource type
+```
+AWS::aws-product-name::data-type-name
+```
+## Mapping
+```
+Mappings:
+    Mapping01:
+        Key01:
+            Name: Value01
+        Key02:
+            Name: Value02
+        Key03:
+            Name: Value03
+```
