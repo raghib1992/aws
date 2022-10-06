@@ -1,0 +1,1 @@
+Simplifies administrator and maintenance task across multiple account (WAF rules, Shield, VPC security group)
