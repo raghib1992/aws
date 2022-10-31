@@ -1,12 +1,12 @@
 Ref https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Tutorials.WebServerDB.CreateVPC.html
 
-Create a VPC with private and public subnets
+1. Create a VPC with private and public subnets
 
-Create a VPC security group for a public web server
+2. Create a VPC security group for a public web server
 
-Create a VPC security group for a private DB instance
+3. Create a VPC security group for a private DB instance
 
-Create a DB subnet group
+4. Create a DB subnet group
     - Note the subnet IDs of the subnets named tutorial-subnet-private1-us-west-2a and tutorial-subnet-private2-us-west-2b.
     
     Test-subnet-private1-ap-south-1a    subnet-042c6d4fbb5726cdb
@@ -14,11 +14,14 @@ Create a DB subnet group
 
     You need the subnet IDs when you create your DB subnet group.
 
+****************************************************************
+# Create a DB Instance
 
+# Ref https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Tutorials.WebServerDB.CreateDBInstance.html
 
-    test-db-instance.cygdv6gy86fw.ap-south-1.rds.amazonaws.com 3306
-    DB instance identifie   test-db
-**********************************************************************************************
+****************************************************************
+# Install a web server
+
 # Ref: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Tutorials.WebServerDB.CreateWebServer.html
 ## Install a web server on your EC2 instance
 ```
@@ -217,4 +220,5 @@ function TableExists($tableName, $connection, $dbName) {
 
 ## Connecting to a DB instance running the MySQL database engine
 yum install mariadb
-mysql -h test-db.cygdv6gy86fw.ap-south-1.rds.amazonaws.com -P 3306 -u test -p
+mysql -h databse-1-cluster.cluster-cygdv6gy86fw.ap-south-1.rds.amazonaws.com -P 3306 -u admin -p
+
